@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta charset="UTF-8">
+<title>所有用户</title>
+</head>
+<script type="text/javascript" src="js/jquery-1.9.1.min.js">
+</script>
+<body>
+	<table border="1" >
+		<tr>
+			<th>id</th>
+			<th>姓名</th>
+			<th>性别</th>
+			<th>年龄</th>
+			<th>电话</th>
+			<th>操作</th>
+		</tr>
+
+	</table>
+	<a href="showusers.html?currentpage=1">首页</a>
+	<a href="" id="a2">上一页</a>
+	<a href="" id="a3">下一页</a>
+	<a href="" id="a4">尾页</a>
+	<a href="index.html"><input type="button" value="返回" /></a>
+<script type="text/javascript">
+	$.ajaxSetup({
+		"contentType":"application/www-form-urlencoded;charset=utf-8"
+	});
+	var currentpage=getUrlParam('currentpage');
+	currentpage=parseInt(currentpage);
+	var allPages;
+	//ajax发送请求获取当前页面数的 学生信息和总页数
+	$.post("/Test1213/UserServlet?action=showUsers&currentpage="+currentpage,{},function(usersDTO_str){
+		var usersDTO = JSON.parse(usersDTO_str);//将JS字符串转换为JSON对象
+		var content="";
+		//获取学生信息
+		$.each(usersDTO.users,function(i,user){
+			content+="<tr>"+
+						 "<td>"+user.uid+"</td>"+
+						 "<td>"+user.uname+"</td>"+
+						 "<td>"+user.usex+"</td>"+
+						 "<td>"+user.uage+"</td>"+
+						 "<td>"+user.uphone+"</td>"+
+						 "<td><a href='UserServlet?action=delUser&uid="+user.uid+"'>删除</a>&nbsp &nbsp<a href='reuserinfo.jsp?uid="+user.uid+"'>修改</a></td>"+
+					  "</tr>";	 
+		});
+		$("table").append(content);
+		//获取总页数 且存入allPages变量中
+		allPages=$.each(usersDTO.allPage,function(i,allPage){
+			return parseInt(allPage);
+		});
+		//alert(allPages);
+		
+	},"text");
+	
+	//上一页
+	$("#a2").click(function () {
+		if(currentpage!=1){
+			$(this).attr({"href":"showusers.html?currentpage="+(currentpage-=1)}); 
+		}else{
+			$(this).attr({"href":"showusers.html?currentpage=1"});
+		}
+		});
+	
+	//下一页
+	$("#a3").click(function () {
+		if(currentpage!=allPages){
+			$(this).attr({"href":"showusers.html?currentpage="+(currentpage+1)}); 
+		}else{
+			$(this).attr({"href":"showusers.html?currentpage="+allPages});
+		}
+		});
+	//尾页
+	$("#a4").click(function () {
+		$(this).attr({"href":"showusers.html?currentpage="+allPages});
+		});
+	
+	//获取url中的参数
+	function getUrlParam(name) {
+		var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+		var r = window.location.search.substr(1).match(reg); //匹配目标参数
+	 	if (r != null) return unescape(r[2]); return 1; //返回参数值
+		}
+</script>
+</body>
+</html>
